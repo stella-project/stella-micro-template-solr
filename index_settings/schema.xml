@@ -1,0 +1,831 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Id$ -->
+<!--
+ This is the Solr schema file. This file should be named "schema.xml" and
+ should be in the conf directory.
+
+ For more information, on how to customize this file, please see
+ http://wiki.apache.org/solr/SchemaXml
+
+ PERFORMANCE NOTE: this schema includes many optional features and should not
+ be used for benchmarking.  To improve performance one could
+  - set stored="false" for all fields possible (esp large fields) when you
+    only need to search on the field but don't need to return the original
+    value.
+  - set indexed="false" if you don't need to search on the field, but only
+    return the field as a result of searching on other indexed fields.
+  - remove all unneeded copyField statements
+  - for best index size and searching performance, set "index" to false
+    for all general text fields, use copyField to copy them to the
+    catchall "text" field, and use that for searching.
+  - For maximum indexing performance, use the StreamingUpdateSolrServer
+    java client.
+  - Remember to run the JVM in server mode, and use a higher logging level
+    that avoids logging every request
+-->
+
+<schema name="solrAEP" version="1.5">
+  <!-- attribute "name" is the name of this schema and is only used for display purposes.
+       version="x.y" is Solr's version number for the schema syntax and
+       semantics.  It should not normally be changed by applications.
+
+       1.0: multiValued attribute did not exist, all fields are multiValued
+            by nature
+       1.1: multiValued attribute introduced, false by default
+       1.2: omitTermFreqAndPositions attribute introduced, true by default
+            except for text fields.
+       1.3: removed optional field compress feature
+       1.4: autoGeneratePhraseQueries attribute introduced to drive QueryParser
+            behavior when a single string produces multiple tokens.  Defaults
+            to off for version >= 1.4
+       1.5: omitNorms defaults to true for primitive field types
+            (int, float, boolean, string...)
+     -->
+
+    <fields>
+        <!-- Valid attributes for fields:
+          name: mandatory - the name for the field
+          type: mandatory - the name of a field type from the <types> fieldType section
+          indexed: true if this field should be indexed (searchable or sortable)
+          stored: true if this field should be retrievable
+          docValues: true if this field should have doc values. Doc values are
+            useful for faceting, grouping, sorting and function queries. Although not
+            required, doc values will make the index faster to load, more
+            NRT-friendly and more memory-efficient. They however come with some
+            limitations: they are currently only supported by StrField, UUIDField
+            and all Trie*Fields, and depending on the field type, they might
+            require the field to be single-valued, be required or have a default
+            value (check the documentation of the field type you're interested in
+            for more information)
+          multiValued: true if this field may contain multiple values per document
+          omitNorms: (expert) set to true to omit the norms associated with
+            this field (this disables length normalization and index-time
+            boosting for the field, and saves some memory).  Only full-text
+            fields or fields that need an index-time boost need norms.
+            Norms are omitted for primitive (non-analyzed) types by default.
+          termVectors: [false] set to true to store the term vector for a
+            given field.
+            When using MoreLikeThis, fields used for similarity should be
+            stored for best performance.
+          termPositions: Store position information with the term vector.
+            This will increase storage costs.
+          termOffsets: Store offset information with the term vector. This
+            will increase storage costs.
+          required: The field is required.  It will throw an error if the
+            value does not exist
+          default: a value that should be used if no value is specified
+            when adding a document.
+        -->
+
+        <!-- field names should consist of alphanumeric or underscore characters only and
+           not start with a digit.  This is not currently strictly enforced,
+           but other field names will not have first class support from all components
+           and back compatibility is not guaranteed.  Names with both leading and
+           trailing underscores (e.g. _version_) are reserved.
+        -->
+
+        <field name="id" type="string" stored="true" indexed="true" />
+        <field name="language" type="string" stored="true" indexed="true" />
+        <field name="boost" type="float" stored="true" indexed="true" />
+
+        <field name="TEXT" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" />
+        <field name="ABSTRACT" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="DESCRIPTION" type="averbisEP" stored="true" indexed="true" 
+	   termVectors="true" termPositions="true" termOffsets="true" />
+	<!-- bwolff: changed FS to FSav
+	     Averbis not used anymore. Use field FS now for Field without Averbis-->
+        <field name="FSav" type="averbisEP" stored="false" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="NEWTITLE" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="NOT_norm" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="OCRDATA" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" />
+        <field name="OLDTITLE" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="TI" type="averbisEP" stored="false" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true"  multiValued="true"/>
+        <field name="TITLE" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" />
+        <field name="TITLEVARIANT" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true"/>
+        <field name="TITLETRANSLAT" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" multiValued="true" />
+        <field name="UNTERTITEL" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" />
+        <field name="UNTERTITELTRANSLAT" type="averbisEP" stored="true" indexed="true"
+           termVectors="true" termPositions="true" termOffsets="true" />
+        <!-- TITLEWORDS s. #1588 nur fuer copyField in Suchfelder -->
+        <field name="TITLEWORDS" type="ignored" stored="false" indexed="false" multiValued="true" />
+
+        <!-- weitere Suchfelder -->
+        <field name="AU" type="diacritics" stored="false" indexed="true" multiValued="true" />
+        <field name="DB" type="string" stored="false" indexed="true" multiValued="true" docValues="true" />
+        <field name="DT" type="string" stored="false" indexed="true" multiValued="true" />
+        <field name="IN" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="KW" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="PU" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="PY" type="string" stored="false" indexed="true" multiValued="true" />
+        <field name="RD" type="string" stored="false" indexed="true" multiValued="true" />
+        <field name="SO" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="LA" type="string" stored="false" indexed="true" multiValued="true" />
+        <field name="NR" type="nr_id" stored="false" indexed="true" multiValued="true" />
+
+        <field name="TIx" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="TITLEx" type="text" stored="false" indexed="true" multiValued="true" />
+	<!-- changed field name "FSx" to "FS" -> FS was formerly for Averbis -->
+	<field name="FS" type="text" stored="false" indexed="true" multiValued="true" />
+        <field name="title_exact" type="text_lr" indexed="true" stored="false" multiValued="true"/>
+        <field name="title_l" type="text_l" indexed="true" stored="false" multiValued="true"/>
+
+        <field name="DOMAIN" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <field name="PUBLICAccess" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <field name="FILESIZE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="FILESIZEGROUP" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="MIMETYPE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="TIMESTAMP" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <field name="CONTAINSIMAGE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="AGE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="ARTICLELANGUAGE" type="string" stored="true" indexed="true" multiValued="true" docValues="true" />
+        <field name="AVAILABLE" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <field name="AUSGABE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="AUTHOR" type="diacritics" stored="true" indexed="true" multiValued="true" />
+        <!-- Autoren mit zusammengelegten Initialen wie in Pubmed. Werden beim update erzeugt. Nur fuer copyfield -->
+        <!-- field name="AUTHOR_INITIALS" type="ignored" stored="false" indexed="false" multiValued="true" / -->
+        <field name="AUTHOR_INITIALS" type="diacritics" stored="true" indexed="true" multiValued="true" />
+        <field name="BEGLEITMATERIAL" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="BEIWERK" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="BESTAND" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="bibkey" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="bibkey0" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="CELEBPERSON" type="diacritics" stored="true" indexed="true" multiValued="true" />
+        <field name="COLLECTIONSORT" type="string" stored="true" indexed="true" multiValued="false" />
+        <field name="COLLECTIONID" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="COLLECTIONTITLE" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="DATABASE" type="string" stored="true" indexed="true" multiValued="true" docValues="true" />
+        <field name="DBRECORDID" type="string" stored="true" indexed="true" />
+        <field name="DISSHABIL" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="DBDOCTYPE" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="DBDOCTYPEFACET" type="string" stored="false" indexed="true" multiValued="true" />
+        <field name="DOCTYPE" type="string" stored="true" indexed="true" multiValued="true" docValues="true" />
+        <field name="DOCTYPEFACET" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="DOCUMENTURL" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="DOI" type="lowercase" stored="true" indexed="true" multiValued="true" />
+        <field name="EISSN" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="EVENT" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="FIRSTAUTHOR" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="FORMAT" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="HBZID" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="HERAUSGEBER" type="diacritics" stored="true" indexed="true" multiValued="true" />
+        <field name="ID" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <field name="IDENTIFIER" type="string" stored="true" indexed="true" multiValued="true" /> <!-- ??? -->
+        <!-- field name="INSTITCONGR" type="string" stored="true" indexed="true" multiValued="true" / -->
+        <field name="INSTITCONGR" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="INSTITUTION" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="ISBN" type="isn" stored="true" indexed="true" multiValued="true" />
+        <field name="ISSN" type="isn" stored="true" indexed="true" multiValued="true" />
+        <field name="ISSUE" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="KEYWORDS" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="KOR_norm" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="LANGUAGE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="LISTTAG" type="multstring" stored="true" indexed="true" multiValued="true" />
+        <field name="ACCESS" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="MASSSTAB" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="MedlineTA" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="MedlineTANorm" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="MESH" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="CHEM" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="MOREPERSONS" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="NOTE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="OLDAUSGABE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PAGES" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="PER_norm" type="diacritics" stored="true" indexed="true" multiValued="true" />
+        <field name="PISSN" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLCOUNTRY" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLICATIONTYPE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLISHER" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLPERIOD" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLPLACE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLYEAR" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="PUBLDATE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="RECORDDATE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="REMARK" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="REPORTNO" type="string" stored="true" indexed="true" multiValued="true" />
+        <!-- field name="SERIENTITEL" type="string" stored="true" indexed="true" multiValued="true" / -->
+        <field name="SERIENTITEL" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="SIGNATURE" type="signatur" stored="true" indexed="true" multiValued="true" />
+        <field name="SONDERSIGNATUR" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="SONDERSTANDORT" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="sortyear" type="tint" stored="true" indexed="true" multiValued="false" />
+        <field name="sortyear_desc" type="string" stored="true" indexed="true" multiValued="false" docValues="true" />
+        <field name="SOURCE" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="SOURCEFACET" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="SUBDATABASE" type="string" stored="true" indexed="true" multiValued="true" docValues="true" />
+        <field name="SUBJECTCODE" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="SWD_norm" type="text" stored="true" indexed="true" multiValued="true" /> 
+        <field name="UMFANG" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="VERFASSERANG" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="VOLUME" type="text" stored="true" indexed="true" multiValued="true" />
+        <field name="ZBMED_OPAC_KATKEY" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="ZDBID" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="ZSTA" type="text" stored="true" indexed="true" multiValued="true" />
+
+        <field name="ENTLIEHENBIS" type="string" stored="true" indexed="true" multiValued="true" />
+        <field name="LEIHSTATUS" type="string" stored="true" indexed="true" multiValued="true" />
+
+        <field name="timestamp" type="tdate" indexed="true" stored="true" default="NOW/HOUR" multiValued="false"/>
+
+
+        <!-- AEP / UIMA AS / ASP 3.x -->
+        <field name="concept" type="string" indexed="true" stored="true"
+            multiValued="true" required="false" />
+        <dynamicField name="concept_*" type="string"
+            indexed="true" stored="true" multiValued="true" required="false" />
+        <field name="descriptor" type="string" indexed="true" stored="true"
+            multiValued="true" required="false" docValues="true" />
+        <field name="classification" type="string" indexed="true" stored="true"
+            multiValued="true" required="false" docValues="true" />
+
+        <field name="search" type="averbisEP" stored="true"
+            indexed="true" termVectors="true" termPositions="true"
+            termOffsets="true" multiValued="true" />
+        <field name="autosuggest" type="lowercase" stored="true"
+            indexed="true" multiValued="true" />
+        <field name="spellcheck" type="text_general" stored="true"
+            indexed="true" multiValued="true" />
+
+        <field name="_version_" type="long" indexed="true" stored="true" />
+
+    </fields>
+
+
+    <!-- Field to use to determine and enforce document uniqueness.
+       Unless this field is marked with required="false", it will be a required field
+    -->
+    <uniqueKey>DBRECORDID</uniqueKey>
+
+
+    <!-- copyField commands copy one field to another at the time a document
+    is added to the index.  It's used either to index the same field differently,
+    or to add multiple fields to the same field for easier/faster searching.  -->
+    <copyField source="concept_*" dest="concept" />
+
+
+        <copyField source="DBRECORDID" dest="id" />
+
+
+        <copyField source="TITLE" dest="spellcheck" />
+        <copyField source="AUTHOR" dest="spellcheck" />
+<!--
+        <copyField source="TEXT" dest="spellcheck" />
+        <copyField source="ABSTRACT" dest="spellcheck" />
+-->
+        <copyField source="concept" dest="autosuggest" />
+        <copyField source="descriptor" dest="autosuggest" />
+
+        <copyField source="TITLE" dest="FS" />
+        <copyField source="TITLEWORDS" dest="FS" />
+        <copyField source="UNTERTITEL" dest="FS" />
+        <copyField source="TITLEVARIANT" dest="FS" />
+        <copyField source="SERIENTITEL" dest="FS" />
+        <copyField source="OLDTITLE" dest="FS" />
+        <copyField source="NEWTITLE" dest="FS" />
+        <copyField source="KEYWORDS" dest="FS" />
+        <copyField source="MESH" dest="FS" />
+        <copyField source="CHEM" dest="FS" />
+        <copyField source="SWD_norm" dest="FS" />
+        <copyField source="SOURCE" dest="FS" />
+        <copyField source="ABSTRACT" dest="FS" />
+        <copyField source="DESCRIPTION" dest="FS" />
+        <copyField source="NOT_norm" dest="FS" />
+        <copyField source="INSTITUTION" dest="FS" />
+        <copyField source="INSTITCONGR" dest="FS" />
+        <copyField source="KOR_norm" dest="FS" />
+        <copyField source="OCRDATA" dest="FS" />
+        <copyField source="TITLETRANSLAT" dest="FS" />
+        <!-- Personen und Jahre in semantisch anal. Feldern sinnvoll? -->
+        <copyField source="AUTHOR" dest="FS" />
+        <copyField source="MOREPERSONS" dest="FS" />
+        <copyField source="HERAUSGEBER" dest="FS" />
+        <copyField source="CELEBPERSON" dest="FS" />
+        <copyField source="PER_norm" dest="FS" />
+        <copyField source="sortyear" dest="FS" />
+        <copyField source="PUBLYEAR" dest="FS" />
+
+        <copyField source="AUTHOR" dest="AU" />
+        <copyField source="AUTHOR_INITIALS" dest="AU" />
+        <copyField source="MOREPERSONS" dest="AU" />
+        <copyField source="HERAUSGEBER" dest="AU" />
+        <copyField source="CELEBPERSON" dest="AU" />
+        <copyField source="PER_norm" dest="AU" />
+
+        <copyField source="TITLE" dest="TI" />
+        <copyField source="TITLEWORDS" dest="TI" />
+        <copyField source="TITLETRANSLAT" dest="TI" />
+        <copyField source="UNTERTITEL" dest="TI" />
+        <copyField source="TITLEVARIANT" dest="TI" />
+        <copyField source="SERIENTITEL" dest="TI" />
+        <copyField source="OLDTITLE" dest="TI" />
+        <copyField source="NEWTITLE" dest="TI" />
+
+        <!-- Die Felder mit *x ohne Averbis-Magie -->
+	<!-- bwolff: Field FSx and TIx not needed anymore
+	<copyField source="TITLE" dest="FSx" />
+        <copyField source="TITLEWORDS" dest="FSx" />
+        <copyField source="UNTERTITEL" dest="FSx" />
+        <copyField source="TITLEVARIANT" dest="FSx" />
+        <copyField source="SERIENTITEL" dest="FSx" />
+        <copyField source="OLDTITLE" dest="FSx" />
+        <copyField source="NEWTITLE" dest="FSx" />
+        <copyField source="KEYWORDS" dest="FSx" />
+        <copyField source="MESH" dest="FSx" />
+        <copyField source="CHEM" dest="FSx" />
+        <copyField source="SWD_norm" dest="FSx" />
+        <copyField source="SOURCE" dest="FSx" />
+        <copyField source="ABSTRACT" dest="FSx" />
+        <copyField source="DESCRIPTION" dest="FSx" />
+        <copyField source="NOT_norm" dest="FSx" />
+        <copyField source="INSTITUTION" dest="FSx" />
+        <copyField source="INSTITCONGR" dest="FSx" />
+        <copyField source="KOR_norm" dest="FSx" />
+        <copyField source="OCRDATA" dest="FSx" />
+        <copyField source="TITLETRANSLAT" dest="FSx" />
+        <copyField source="AUTHOR" dest="FSx" />
+        <copyField source="MOREPERSONS" dest="FSx" />
+        <copyField source="HERAUSGEBER" dest="FSx" />
+        <copyField source="CELEBPERSON" dest="FSx" />
+        <copyField source="PER_norm" dest="FSx" />
+        <copyField source="sortyear" dest="FSx" />
+        <copyField source="PUBLYEAR" dest="FSx" />
+
+        <copyField source="TITLE" dest="TIx" />
+        <copyField source="TITLEWORDS" dest="TIx" />
+        <copyField source="TITLETRANSLAT" dest="TIx" />
+        <copyField source="UNTERTITEL" dest="TIx" />
+        <copyField source="TITLEVARIANT" dest="TIx" />
+        <copyField source="SERIENTITEL" dest="TIx" />
+        <copyField source="OLDTITLE" dest="TIx" />
+        <copyField source="NEWTITLE" dest="TIx" />
+        <copyField source="TITLE" dest="TITLEx" />
+        <copyField source="TITLEWORDS" dest="TITLEx" />
+        <copyField source="TITLE" dest="title_exact" />
+	<copyField source="TITLE" dest="title_l" />-->
+
+        <copyField source="KEYWORDS" dest="KW" />
+        <copyField source="MESH" dest="KW" />
+        <copyField source="CHEM" dest="KW" />
+        <copyField source="SWD_norm" dest="KW" />
+
+        <copyField source="INSTITUTION" dest="IN" />
+        <copyField source="INSTITCONGR" dest="IN" />
+        <copyField source="KOR_norm" dest="IN" />
+        <copyField source="EVENT" dest="IN" />
+
+        <copyField source="DATABASE" dest="DB" />
+        <copyField source="SUBDATABASE" dest="DB" />
+
+        <copyField source="DOCTYPE" dest="DOCTYPEFACET" />
+        <copyField source="DOCTYPE" dest="DT" />
+        <!-- FIXME TODO noch mit Jana absprechen: -->
+        <copyField source="DBDOCTYPE" dest="DT" />
+
+        <copyField source="DBDOCTYPE" dest="DBDOCTYPEFACET" />
+
+        <copyField source="SOURCE" dest="SOURCEFACET" />
+        <copyField source="SOURCE" dest="SO" />
+        <copyField source="sortyear" dest="PY" />
+        <copyField source="ARTICLELANGUAGE" dest="LA" />
+        <copyField source="LANGUAGE" dest="LA" /> <!-- #2236 -->
+        <copyField source="PUBLISHER" dest="PU" />
+        <copyField source="RECORDDATE" dest="RD" />
+
+        <copyField source="PISSN" dest="ISSN" />
+        <copyField source="EISSN" dest="ISSN" />
+
+        <copyField source="ISSN" dest="NR" />
+        <copyField source="ISBN" dest="NR" />
+        <copyField source="DOI" dest="NR" />
+        <copyField source="DBRECORDID" dest="NR" />
+        <copyField source="ZDBID" dest="NR" />
+        <copyField source="HBZID" dest="NR" />
+        <copyField source="ZSTA" dest="NR" />
+        <copyField source="SIGNATURE" dest="NR" />
+        <copyField source="SONDERSIGNATUR" dest="NR" />
+        <!-- Solange es kein reines Suchfeld fuer die Signatur gibt (#2218): -->
+        <copyField source="SONDERSIGNATUR" dest="SIGNATURE" />
+
+<!--
+        <copyField source="TITLE" dest="search" />
+        <copyField source="TEXT" dest="search" />
+        <copyField source="UNTERTITEL" dest="search" />
+        <copyField source="TITLEVARIANT" dest="search" />
+        <copyField source="SERIENTITEL" dest="search" />
+        <copyField source="OLDTITLE" dest="search" />
+        <copyField source="NEWTITLE" dest="search" />
+        <copyField source="KEYWORDS" dest="search" />
+        <copyField source="MESH" dest="search" />
+        <copyField source="CHEM" dest="search" />
+        <copyField source="SWD_norm" dest="search" />
+        <copyField source="SOURCE" dest="search" />
+        <copyField source="ABSTRACT" dest="search" />
+        <copyField source="DESCRIPTION" dest="search" />
+        <copyField source="NOT_norm" dest="search" />
+        <copyField source="INSTITUTION" dest="search" />
+        <copyField source="INSTITCONGR" dest="search" />
+        <copyField source="KOR_norm" dest="search" />
+        <copyField source="OCRDATA" dest="search" />
+        <copyField source="TITLETRANSLAT" dest="search" />
+        <copyField source="AUTHOR" dest="search" />
+        <copyField source="MOREPERSONS" dest="search" />
+        <copyField source="HERAUSGEBER" dest="search" />
+        <copyField source="CELEBPERSON" dest="search" />
+        <copyField source="PER_norm" dest="search" />
+        <copyField source="sortyear" dest="search" />
+-->
+
+    <types>
+    <!-- field type definitions. The "name" attribute is
+       just a label to be used by field definitions.  The "class"
+       attribute and any other attributes determine the real
+       behavior of the fieldType.
+         Class names starting with "solr" refer to java classes in a
+       standard package such as org.apache.solr.analysis
+    -->
+
+    <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
+        <fieldType name="string" class="solr.StrField"
+            sortMissingLast="true" />
+
+    <!-- boolean type: "true" or "false" -->
+        <fieldType name="boolean" class="solr.BoolField"
+            sortMissingLast="true" />
+
+    <!-- sortMissingLast and sortMissingFirst attributes are optional attributes are
+         currently supported on types that are sorted internally as strings
+         and on numeric types.
+	     This includes "string","boolean", and, as of 3.5 (and 4.x),
+	     int, float, long, date, double, including the "Trie" variants.
+       - If sortMissingLast="true", then a sort on this field will cause documents
+         without the field to come after documents with the field,
+         regardless of the requested sort order (asc or desc).
+       - If sortMissingFirst="true", then a sort on this field will cause documents
+         without the field to come before documents with the field,
+         regardless of the requested sort order.
+       - If sortMissingLast="false" and sortMissingFirst="false" (the default),
+         then default lucene sorting will be used which places docs without the
+         field first in an ascending sort and last in a descending sort.
+    -->
+
+    <!--
+      Default numeric field types. For faster range queries, consider the tint/tfloat/tlong/tdouble types.
+
+      These fields support doc values, but they require the field to be
+      single-valued and either be required or have a default value.
+    -->
+        <fieldType name="int" class="solr.TrieIntField"
+            precisionStep="0" positionIncrementGap="0" />
+        <fieldType name="float" class="solr.TrieFloatField"
+            precisionStep="0" positionIncrementGap="0" />
+        <fieldType name="long" class="solr.TrieLongField"
+            precisionStep="0" positionIncrementGap="0" />
+        <fieldType name="double" class="solr.TrieDoubleField"
+            precisionStep="0" positionIncrementGap="0" />
+
+    <!--
+     Numeric field types that index each value at various levels of precision
+     to accelerate range queries when the number of values between the range
+     endpoints is large. See the javadoc for NumericRangeQuery for internal
+     implementation details.
+
+     Smaller precisionStep values (specified in bits) will lead to more tokens
+     indexed per value, slightly larger index size, and faster range queries.
+     A precisionStep of 0 disables indexing at different precision levels.
+    -->
+        <fieldType name="tint" class="solr.TrieIntField"
+            precisionStep="8" positionIncrementGap="0" />
+        <fieldType name="tfloat" class="solr.TrieFloatField"
+            precisionStep="8" positionIncrementGap="0" />
+        <fieldType name="tlong" class="solr.TrieLongField"
+            precisionStep="8" positionIncrementGap="0" />
+        <fieldType name="tdouble" class="solr.TrieDoubleField"
+            precisionStep="8" positionIncrementGap="0" />
+
+    <!-- The format for this date field is of the form 1995-12-31T23:59:59Z, and
+         is a more restricted form of the canonical representation of dateTime
+         http://www.w3.org/TR/xmlschema-2/#dateTime
+         The trailing "Z" designates UTC time and is mandatory.
+         Optional fractional seconds are allowed: 1995-12-31T23:59:59.999Z
+         All other components are mandatory.
+
+         Expressions can also be used to denote calculations that should be
+         performed relative to "NOW" to determine the value, ie...
+
+               NOW/HOUR
+                  ... Round to the start of the current hour
+               NOW-1DAY
+                  ... Exactly 1 day prior to now
+               NOW/DAY+6MONTHS+3DAYS
+                  ... 6 months and 3 days in the future from the start of
+                      the current day
+
+         Consult the DateField javadocs for more information.
+
+         Note: For faster range queries, consider the tdate type
+      -->
+        <fieldType name="date" class="solr.TrieDateField"
+            precisionStep="0" positionIncrementGap="0" />
+
+    <!-- A Trie based date field for faster date range queries and date faceting. -->
+        <fieldType name="tdate" class="solr.TrieDateField"
+            precisionStep="6" positionIncrementGap="0" />
+
+
+    <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
+        <fieldtype name="binary" class="solr.BinaryField" />
+
+        <!-- The "RandomSortField" is not used to store or search any
+         data.  You can declare fields of this type it in your schema
+         to generate pseudo-random orderings of your docs for sorting
+         or function purposes.  The ordering is generated based on the field
+         name and the version of the index. As long as the index version
+         remains unchanged, and the same field name is reused,
+         the ordering of the docs will be consistent.
+         If you want different psuedo-random orderings of documents,
+         for the same version of the index, use a dynamicField and
+         change the field name in the request.
+        -->
+        <fieldType name="random" class="solr.RandomSortField" indexed="true" />
+
+    <!-- solr.TextField allows the specification of custom text analyzers
+         specified as a tokenizer and a list of token filters. Different
+         analyzers may be specified for indexing and querying.
+
+         The optional positionIncrementGap puts space between multiple fields of
+         this type on the same document, with the purpose of preventing false phrase
+         matching across fields.
+
+            For more info on customizing your analyzer chain, please see
+            http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters
+        -->
+
+
+        <!-- A general text field that has reasonable, generic
+     cross-language defaults: it tokenizes with StandardTokenizer,
+        and down cases.  -->
+        <fieldType name="text_general" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1" generateNumberParts="1"
+                        catenateWords="1" catenateNumbers="1" catenateAll="0"
+                        splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+<!-- s. http://robotlibrarian.billdueber.com/2012/03/boosting-on-exactish-anchored-phrase-matching-in-solr-sst-4/ -->
+        <fieldType name="text_lr" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer>
+                <charFilter class="solr.PatternReplaceCharFilterFactory"
+                        pattern="^(.*)$" replacement="AAAA $1 ZZZZ" />
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1" generateNumberParts="1"
+                        catenateWords="1" catenateNumbers="1" catenateAll="0"
+                        splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <!-- filter class="solr.StopFilterFactory" words="basic_stopwords.txt" / -->
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+        </fieldType>
+        <fieldType name="text_l" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer>
+                <charFilter class="solr.PatternReplaceCharFilterFactory"
+                        pattern="^(.*)$" replacement="AAAA $1" />
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1" generateNumberParts="1"
+                        catenateWords="1" catenateNumbers="1" catenateAll="0"
+                        splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <!-- filter class="solr.StopFilterFactory" words="basic_stopwords.txt" / -->
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+
+        <fieldType name="url" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1" generateNumberParts="1" />
+            </analyzer>
+        </fieldType>
+
+        <!-- since fields of this type are by default not stored or indexed,
+        any data added to them will be ignored outright.  -->
+        <fieldtype name="ignored" stored="false" indexed="false"
+                   multiValued="true" class="solr.StrField" />
+
+        <!-- This point type indexes the coordinates as separate fields (subFields)
+         If subFieldType is defined, it references a type, and a dynamic field
+         definition is created matching *___<typename>.  Alternately, if
+         subFieldSuffix is defined, that is used to create the subFields.
+         Example: if subFieldType="double", then the coordinates would be
+           indexed in fields myloc_0___double,myloc_1___double.
+         Example: if subFieldSuffix="_d" then the coordinates would be indexed
+           in fields myloc_0_d,myloc_1_d
+         The subFields are an implementation detail of the fieldType, and end
+         users normally should not need to know about them.
+        -->
+        <fieldType name="point" class="solr.PointType"
+                   dimension="2" subFieldSuffix="_d" />
+
+        <!-- A specialized field for geospatial search. If indexed, this fieldType must not be multivalued. -->
+        <fieldType name="location" class="solr.LatLonType"
+                   subFieldSuffix="_coordinate" />
+
+        <!-- An alternative geospatial field type new to Solr 4.  It supports multiValued and polygon shapes.
+          For more information about this and other Spatial fields new to Solr 4, see:
+          http://wiki.apache.org/solr/SolrAdaptersForLuceneSpatial4
+        -->
+
+        <!-- bwolff: Changed units to distanceUnits -->
+        <fieldType name="location_rpt"
+                   class="solr.SpatialRecursivePrefixTreeFieldType" geo="true"
+                   distErrPct="0.025" maxDistErr="0.000009" distanceUnits="degrees" />
+
+
+        <!-- ###################### AVERBIS START AVERBIS ###################### -->
+
+        <!-- bwolff: changed fieldType to empty -->
+        <fieldType name="averbisEP" class="solr.TextField">
+            
+        </fieldType>
+        -->
+        <!-- Averbis AEP Field Type -->
+        <!-- ohne AS -->
+        <!-- bwolff: Auskommentiert
+        <fieldType name="averbisEP" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer
+                    class="de.averbis.solr.analysis.AEPTokenizerFactory"
+                    aaeConfigFile="${aep.aae.configfile}" mode="index"
+                    terminologyService="terminologyService.xml" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer
+                    class="de.averbis.solr.analysis.AEPTokenizerFactory"
+                    aaeConfigFile="${aep.aae.configfile.query}" mode="search"
+                    terminologyService="terminologyService.xml" />
+            </analyzer>
+        </fieldType>
+        -->
+        <!-- mit AS
+        <fieldType name="averbisEP" class="solr.TextField" positionIncrementGap="100">
+          <analyzer type="index">
+            <tokenizer class="de.averbis.solr.analysis.AEPTokenizerFactory"
+              brokerURI="${aep.as.broker.uri}"
+              endpointName="${aep.as.broker.endpointname}"
+              mode="index" terminologyService="terminologyService.xml" />
+          </analyzer>
+          <analyzer type="query">
+            <tokenizer class="de.averbis.solr.analysis.AEPTokenizerFactory"
+              brokerURI="${aep.as.broker.uri}"
+              endpointName="${aep.as.broker.endpointname}"
+              mode="search" terminologyService="terminologyService.xml" />
+          </analyzer>
+        </fieldType>
+        -->
+
+        <!-- lowercases the entire field value, keeping it as a single token.  -->
+        <fieldType name="lowercase" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <!-- Analyzer for names. Adds diacritics free versions as synonyms -->
+        <fieldType name="diacritics" class="solr.TextField">
+            
+        </fieldType>
+
+        <!-- ###################### AVERBIS END AVERBIS ###################### -->
+
+        <!-- Text Field for Normalized ISBN/ISSN Numbers - take first chunk of text
+             prior to whitespace, force to lowercase, strip non-ISBN/ISSN characters,
+             omit results that are empty after stripping. 
+             Grundstruktur weitgehend aus Vufind, Regular Expression von ML
+        -->
+        <fieldType name="signatur" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="[^a-z0-9]+" replacement="_" replace="all"
+            />
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="_$" replacement=""
+            />
+          </analyzer>
+        </fieldType>
+<!--
+        <fieldType name="signatur" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+            <tokenizer class="solr.solr.KeywordTokenizerFactory" />
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="[^a-z0-9]+" replacement="" replace="all"
+            />
+          </analyzer>
+        </fieldType>
+-->
+        <!-- Mehrere Werte in einem Feld (Trenner ' ; ') sparsam normalisiert -->
+        <fieldType name="multstring" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+            <tokenizer class="solr.PatternTokenizerFactory" pattern=" ; " />
+            <filter class="solr.LowerCaseFilterFactory"/>
+          </analyzer>
+        </fieldType>
+
+        <fieldType name="isn" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+            <tokenizer class="solr.PatternTokenizerFactory" pattern="^(\S*)\s*.*$" group="1"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="^([\d\-\.]+[xX]?).*$" replacement="$1"
+            />
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="[\-\.]" replacement=""  replace="all"
+            />
+            <!-- 979er duerfen eigentlich nicht reduziert werden, sind aber oft Vertipper -->
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="^97[89](\d{9}).*$" replacement="$1"
+            />
+            <!-- Pruefziffer bei 10stelligen entfernen -->
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="^(\d{9}).$" replacement="$1"
+            />
+            <filter class="solr.LengthFilterFactory" min="1" max="100" />
+            <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+          </analyzer>
+        </fieldType>
+        <!-- etwas allgemeiner als isn (auch fuer andere IDs) bisher allerdings fast identisch -->
+        <fieldType name="nr_id" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+            <tokenizer class="solr.PatternTokenizerFactory" pattern="^(\S*)\s*.*$" group="1"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="^([\d\-\.]+[xX]?).*$" replacement="$1"
+            />
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="[\-\.]" replacement=""  replace="all"
+            />
+            <!-- 979er duerfen eigentlich nicht reduziert werden, sind aber oft Vertipper -->
+            <filter class="solr.PatternReplaceFilterFactory"
+                 pattern="^97[89](\d{9}).*$" replacement="$1"
+            />
+            <filter class="solr.LengthFilterFactory" min="1" max="100" />
+            <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+          </analyzer>
+        </fieldType>
+
+
+    </types>
+
+    <!-- Similarity is the scoring routine for each document vs. a query.
+       A custom Similarity or SimilarityFactory may be specified here, but
+       the default is fine for most applications.
+       For more info: http://wiki.apache.org/solr/SchemaXml#Similarity
+    -->
+    <!--
+     <similarity class="com.example.solr.CustomSimilarityFactory">
+       <str name="paramkey">param value</str>
+     </similarity>
+    -->
+
+</schema>

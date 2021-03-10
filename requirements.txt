@@ -1,0 +1,4 @@
+flask
+pysolr
+requests
+jsonlines
