@@ -28,17 +28,10 @@ class Ranker(object):
         return 'Index built', 200
 
     def rank_publications(self, query, page, rpp):
-
-        itemlist = []
         start = page * rpp
 
         if query is not None:
-            params = ['indent=on',
-                      'wt=json',
-                      'fl=DBRECORDID,score',
-                      'rows=' + str(rpp),
-                      'start=' + str(start)]
-
+            params = ['indent=on', 'wt=json', 'fl=DBRECORDID,score', 'rows=' + str(rpp), 'start=' + str(start)]
             solrParams = '&'.join(params)
 
             solr_query = 'TITLE:' + '(' + query + ')'
@@ -47,11 +40,7 @@ class Ranker(object):
             response = urllib.request.urlopen(solrURL)
             results = json.loads(response.read().decode('utf-8'))
 
-            for result in results['response']['docs']:
-                try:
-                    itemlist.append(result)
-                except:
-                    pass
+            itemlist = results['response']['docs']
 
         return {
             'page': page,
