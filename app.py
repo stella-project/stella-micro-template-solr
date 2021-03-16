@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, redirect
-# from systems import Ranker, Recommender
+from systems import Ranker, Recommender
 from systems import Ranker
 
 app = Flask(__name__)
-ranker = Ranker()
-# recommender = Recommender()
+# ranker = Ranker()
+recommender = Recommender()
 
 @app.route('/')
 def redirect_to_test():
@@ -18,18 +18,18 @@ def test():
 
 @app.route('/index', methods=["GET"])
 def index():
-    ranker.index()
-    # recommender.index()
+    # ranker.index()
+    recommender.index()
     return 'Indexing done!', 200
 
 
-@app.route('/ranking', methods=["GET"])
-def ranking():
-    query = request.args.get('query', None)
-    page = request.args.get('page', default=0, type=int)
-    rpp = request.args.get('rpp', default=20, type=int)
-    response = ranker.rank_publications(query, page, rpp)
-    return jsonify(response)
+# @app.route('/ranking', methods=["GET"])
+# def ranking():
+#     query = request.args.get('query', None)
+#     page = request.args.get('page', default=0, type=int)
+#     rpp = request.args.get('rpp', default=20, type=int)
+#     response = ranker.rank_publications(query, page, rpp)
+#     return jsonify(response)
 
 
 
