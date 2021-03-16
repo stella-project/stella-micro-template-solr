@@ -34,7 +34,7 @@ class Ranker(object):
         self.config = 'server/solr/configsets/livivo'
 
         # self.index_settings_path = os.path.join('index_settings', 'livivo_settings.json')
-        self.documents_path = './data/livivo/documents'
+        self.documents_path = '/data/livivo/documents/'
 
     def test(self):
         return 200
@@ -43,9 +43,12 @@ class Ranker(object):
 
         subprocess.call("/opt/solr-8.8.1/bin/solr create_core -c livivo -d server/solr/configsets/livivo".split())
 
+        files = [os.path.join(self.documents_path, f) for f in os.listdir(self.documents_path) if os.path.isfile(os.path.join(self.documents_path, f))]
 
-        subprocess.call(
-            "/opt/solr-8.8.1/bin/post -c livivo /data/livivo/documents/*jsonl".split())
+        for file in files:
+            command = "/opt/solr-8.8.1/bin/post -c livivo "+file
+            subprocess.call(command.split())
+
 
 # bin/solr create_core -c test -d server/solr/configsets/livivo
         #
