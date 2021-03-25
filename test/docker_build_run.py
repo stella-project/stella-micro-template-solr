@@ -8,7 +8,7 @@ client = docker.from_env(timeout=86400)
 
 
 def build():
-    client.images.build(path="../", tag=img_tag)
+    client.images.build(path="../", tag=img_tag, rm=True)
     print('Container is built.')
 
 
@@ -17,8 +17,8 @@ def run():
                           ports={'5000/tcp': 5000, '8983/tcp': 8983},
                           name=container_name,
                           detach=True,
-                          volumes={'/home/jueri/STELLA_DEV/data/': {'bind': '/data/', 'mode': 'rw'},
-                                   '/home/jueri/STELLA_DEV/index/':{'bind': '/index/', 'mode': 'rw'}}
+                          volumes={'/path/to/host/data/':{'bind': '/data/', 'mode': 'rw'},
+                                   '/path/to/host/index/':{'bind': '/index/', 'mode': 'rw'}}
                           )
     print('Container is running.')
 
