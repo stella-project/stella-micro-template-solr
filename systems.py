@@ -3,6 +3,19 @@ import json
 import jsonlines
 import subprocess
 import urllib
+import pysolr
+
+
+def load_json(directory, id_field):
+    for path, subdir, file in os.walk(directory):
+        extensions = tuple([".jsonl"])
+        files = [f for f in file if f.endswith(extensions)]
+        for f in files:
+            with jsonlines.open(os.path.join(path, f), 'r') as reader:
+                for obj in reader:
+                    del obj['links']
+                    yield obj
+
 
 class Ranker(object):
 
@@ -54,22 +67,22 @@ class Ranker(object):
 class Recommender(object):
 
     def __init__(self):
-        self.base_url = 'http://0.0.0.0:8983'
+        self.base_url = 'http://localhost:8983'
         self.documents_path = '/data/gesis-search/documents/'
         self.datasets_path = '/data/gesis-search/datasets/'
 
         self.core_documents = 'gesis_documents'
         self.core_documents_url = '/solr/{}/'.format(self.core_documents)
+        self.solr_docs = pysolr.Solr(self.base_url + self.core_documents_url, always_commit=True)
 
         self.core_datasets = 'gesis_datasets'
         self.core_datasets_url = '/solr/{}/'.format(self.core_datasets)
+        self.solr_data = pysolr.Solr(self.base_url + self.core_datasets_url, always_commit=True)
 
 
-#
-#         self.es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-#
+
     def index(self):
-
+        # Datasets
         command = "/opt/solr-8.8.1/bin/solr create_core -c {} -d server/solr/configsets/datasets".format(self.core_datasets)
         subprocess.call(command.split())
 
@@ -81,52 +94,35 @@ class Recommender(object):
             subprocess.call(command.split())
 
 
+
+        # Documents
+        command = "/opt/solr-8.8.1/bin/solr create_core -c {} -d server/solr/configsets/documents".format(
+            self.core_documents)
+        subprocess.call(command.split())
+
+        for path, subdir, file in os.walk(self.documents_path):
+            extensions = tuple([".jsonl"])
+            files = [f for f in file if f.endswith(extensions)]
+            for f in files:
+                with jsonlines.open(os.path.join(path, f), 'r') as reader:
+                    self.solr_docs.add(list(reader))
+
         return 'Indices built', 200
-#
-#     def recommend_datasets(self, item_id, page, rpp):
-#         itemlist = []
-#
-#         start = page * rpp
-#
-#         if item_id is not None:
-#
-#             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-#
-#             result = es.search(index=self.index_documents,
-#                                from_=start,
-#                                size=rpp,
-#                                body={"query": {"multi_match": {"query": item_id, "fields": ["id"]}}})
-#
-#             if result["hits"]["hits"]:
-#                 title = result["hits"]["hits"][0]['_source']['title']
-#                 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-#
-#                 result = es.search(index=self.index_datasets,
-#                                    from_=start,
-#                                    size=rpp,
-#                                    body={"query": {"multi_match": {"query": title, "fields": ["title", 'abstract']}}})
-#
-#             for res in result["hits"]["hits"]:
-#                 try:
-#                     itemlist.append(res['_source']['id'])
-#                 except:
-#                     pass
-#
-#         return {
-#             'page': page,
-#             'rpp': rpp,
-#             'item_id': item_id,
-#             'itemlist': itemlist,
-#             'num_found': len(itemlist)
-#         }
-#
-#     def recommend_publications(self, item_id, page, rpp):
-#         itemlist = []
-#
-#         return {
-#             'page': page,
-#             'rpp': rpp,
-#             'item_id': item_id,
-#             'itemlist': itemlist,
-#             'num_found': len(itemlist)
-#         }
+
+
+    def recommend_datasets(self, item_id, page, rpp):
+
+        results = self.solr_docs.search('id:' + item_id)
+        doc = list(results)[0]
+
+        q = doc['title'][0]
+
+        itemlist = list(self.solr_data.search('title:(' + q.replace(':', '') + ')'))
+
+        return {
+            'page': page,
+            'rpp': rpp,
+            'item_id': item_id,
+            'itemlist': itemlist,
+            'num_found': len(itemlist)
+        }
