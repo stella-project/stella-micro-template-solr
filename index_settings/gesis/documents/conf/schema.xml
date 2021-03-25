@@ -38,7 +38,7 @@
     catchall "text" field, and use that for searching.
 -->
 
-<schema name="gesis-datasets" version="1.6">
+<schema name="gesis-documents" version="1.6">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
        version="x.y" is Solr's version number for the schema syntax and 
        semantics.  It should not normally be changed by applications.
@@ -109,21 +109,19 @@
          WARNING: The _text_ catch-all field will significantly increase your index size.
          If you don't need it, consider removing it and the corresponding copyField directive.
     -->
-    <field name="abstract" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="abstract_en" type="text_general" indexed="true" stored="true" required="false" multiValued="false" />
-    <field name="countries_collection" type="string" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="doi" type="string" indexed="true" stored="true" required="false" multiValued="True" />
-    <field name="methodology_collection" type="text_general" indexed="true" stored="true" required="false" multiValued="false" />
-    <field name="person" type="string" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="publication_year" type="string" indexed="true" stored="true" required="false" multiValued="false" />
-    <field name="selection_method" type="text_general" indexed="true" stored="true" required="false" multiValued="false" />
-    <field name="subtype" type="string" indexed="true" stored="true" required="false" multiValued="false" />
-    <field name="time_collection" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+
     <field name="title" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="title_en" type="text_general" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="links.label" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
+    <field name="abstract" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
     <field name="topic" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="topic_en" type="text_general" indexed="true" stored="true" required="false" multiValued="true" />
-    <field name="universe" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="person" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+    <field name="links" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+    <field name="subtype" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="document_type" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="coreAuthor" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+    <field name="doi" type="string" indexed="true" stored="true" required="false" multiValued="True" />
+    <field name="date" type="string" indexed="true" stored="true" required="false" multiValued="True" />
 
 
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />

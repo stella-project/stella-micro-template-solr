@@ -101,7 +101,7 @@
        configuration.
     -->
 <!--    <dataDir>${solr.data.dir:}</dataDir>-->
-    <dataDir>/index/</dataDir>
+    <dataDir>/index/datasets</dataDir>
     <!-- The DirectoryFactory to use for indexes.
 
        solr.StandardDirectoryFactory is filesystem
