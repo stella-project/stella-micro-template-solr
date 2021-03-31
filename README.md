@@ -1,4 +1,5 @@
-# Elastic Search micro template of the STELLA infrastructure <a href="https://stella-project.org/"><img align="right" width="100" src="doc/img/logo-st.JPG" /></a>
+<a href="https://stella-project.org/"><img align="right" width="100" src="doc/img/logo-st.JPG" /></a>
+# Elastic Search micro template of the STELLA infrastructure 
 
 This repository provides interested experimenters with a template for integrating their ranking and recommendation systems into the [STELLA infrastructure](https://stella-project.org/) with [Elasticsearch](https://www.elastic.co). It is based on the [stella-micro-template](https://github.com/stella-project/stella-micro-template).
 
